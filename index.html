@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monad Geo-Data Explorer</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: auto; }
+        #container { border: 1px solid #ddd; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* 2. Siapkan div untuk peta */
+        #map { height: 500px; border-radius: 8px; margin-top: 1em; }
+        #status { font-style: italic; color: #555; }
+        #totalPoints { font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Eksplorasi Data Geografis Monad</h1>
+        <p>Status: <span id="status">Menghubungkan ke Monad Testnet...</span></p>
+        <p>Total Titik Data Tersimpan: <span id="totalPoints">...</span></p>
+        <div id="map"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"  type="application/javascript"></script>
+    <script>
+        // --- KONFIGURASI ---
+        const contractAddress = "0xD2B3Be93431dc84F021F50e437d1A642861B4d50"; // Alamat kontrak Anda
+        const monadRpcUrl = "https://rpc.testnet.monad.xyz";
+        const contractABI = [
+             
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "code",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "latitude",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "internalType": "int256",
+          "name": "longitude",
+          "type": "int256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "elevation",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "PointAdded",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_code",
+          "type": "string"
+        },
+        {
+          "internalType": "int256",
+          "name": "_lat",
+          "type": "int256"
+        },
+        {
+          "internalType": "int256",
+          "name": "_lon",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_elev",
+          "type": "uint256"
+        }
+      ],
+      "name": "addPoint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "geoPoints",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "code",
+          "type": "string"
+        },
+        {
+          "internalType": "int256",
+          "name": "latitude",
+          "type": "int256"
+        },
+        {
+          "internalType": "int256",
+          "name": "longitude",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "elevation",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPoint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        },
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pointCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalPoints",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  
+            // <<-- PASTIKAN ABI KONTRAK ANDA SUDAH DITEMPEL DI SINI -->>
+        ];
+
+        // --- LOGIKA UTAMA ---
+        async function main() {
+            const statusEl = document.getElementById("status");
+            const totalPointsEl = document.getElementById("totalPoints");
+
+            try {
+                // 3. Membuat koneksi ke blockchain
+                const provider = new ethers.providers.JsonRpcProvider(monadRpcUrl);
+                
+                // 4. Membuat object untuk berinteraksi dengan kontrak
+                const geoContract = new ethers.Contract(contractAddress, contractABI, provider);
+                statusEl.textContent = "Koneksi berhasil! Mengambil data...";
+
+                // 5. Inisialisasi Peta Leaflet
+                // Set view ke sekitar Indonesia
+                const map = L.map('map').setView([-2.5, 118.0], 5);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                // 6. Ambil total titik data
+                const total = await geoContract.totalPoints();
+                totalPointsEl.textContent = total.toString();
+                statusEl.textContent = `Mengambil ${total.toString()} titik data...`;
+
+                // 7. Loop untuk mengambil setiap titik dan menampilkannya di peta
+                const PRECISION = 1000000; // Harus sama dengan yang di skrip upload
+                for (let i = 1; i <= total; i++) {
+                    const point = await geoContract.getPoint(i);
+                    
+                    // Konversi kembali ke desimal
+                    // point[2] adalah latitude, point[3] adalah longitude
+                    const lat = point[2].toNumber() / PRECISION;
+                    const lon = point[3].toNumber() / PRECISION;
+                    
+                    // point[1] adalah code
+                    const code = point[1];
+
+                    // Tambahkan marker ke peta
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup(`<b>Titik #${i}</b><br>${code}`);
+                    
+                    // Update status
+                    statusEl.textContent = `Titik #${i} berhasil dimuat.`;
+                }
+
+                statusEl.textContent = "Semua data berhasil ditampilkan di peta!";
+
+            } catch (error) {
+                console.error("Gagal terhubung atau mengambil data:", error);
+                statusEl.textContent = "Gagal mengambil data. Cek console log (F12).";
+            }
+        }
+
+        window.addEventListener('load', main);
+    </script>
+</body>
+</html>
