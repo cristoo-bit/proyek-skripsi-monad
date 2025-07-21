@@ -1,0 +1,296 @@
+[
+    {
+        "Name": 1,
+        "Code": "test",
+        "Latitude_decimal": -2.576473886,
+        "Longitude_decimal": 112.166301972,
+        "Elevation": 48.294
+    },
+    {
+        "Name": 2,
+        "Code": "Detail",
+        "Latitude_decimal": -2.576503114,
+        "Longitude_decimal": 112.166285397,
+        "Elevation": 48.1235
+    },
+    {
+        "Name": 3,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.576498139,
+        "Longitude_decimal": 112.166370386,
+        "Elevation": 48.3069
+    },
+    {
+        "Name": 4,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.576496933,
+        "Longitude_decimal": 112.166376769,
+        "Elevation": 45.9823
+    },
+    {
+        "Name": 5,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.576500044,
+        "Longitude_decimal": 112.166508917,
+        "Elevation": 46.4406
+    },
+    {
+        "Name": 6,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.576493158,
+        "Longitude_decimal": 112.166532561,
+        "Elevation": 47.7417
+    },
+    {
+        "Name": 7,
+        "Code": "Detail",
+        "Latitude_decimal": -2.576468969,
+        "Longitude_decimal": 112.166598469,
+        "Elevation": 47.3016
+    },
+    {
+        "Name": 8,
+        "Code": "Detail",
+        "Latitude_decimal": -2.567091458,
+        "Longitude_decimal": 112.178676494,
+        "Elevation": 48.4605
+    },
+    {
+        "Name": 9,
+        "Code": "Detail",
+        "Latitude_decimal": -2.577878975,
+        "Longitude_decimal": 112.175892617,
+        "Elevation": 48.7163
+    },
+    {
+        "Name": 10,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.577898342,
+        "Longitude_decimal": 112.175819625,
+        "Elevation": 47.9299
+    },
+    {
+        "Name": 11,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.577902414,
+        "Longitude_decimal": 112.175809939,
+        "Elevation": 47.4661
+    },
+    {
+        "Name": 12,
+        "Code": "As Sungai",
+        "Latitude_decimal": -2.577913242,
+        "Longitude_decimal": 112.175777622,
+        "Elevation": 46.5384
+    },
+    {
+        "Name": 13,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.577932756,
+        "Longitude_decimal": 112.175756625,
+        "Elevation": 47.2582
+    },
+    {
+        "Name": 14,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.577937781,
+        "Longitude_decimal": 112.175741278,
+        "Elevation": 47.8329
+    },
+    {
+        "Name": 15,
+        "Code": "Detail",
+        "Latitude_decimal": -2.577973728,
+        "Longitude_decimal": 112.175669922,
+        "Elevation": 48.5026
+    },
+    {
+        "Name": 16,
+        "Code": "Detail",
+        "Latitude_decimal": -2.578988683,
+        "Longitude_decimal": 112.176043822,
+        "Elevation": 48.381
+    },
+    {
+        "Name": 17,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.579054894,
+        "Longitude_decimal": 112.176022208,
+        "Elevation": 48.134
+    },
+    {
+        "Name": 18,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.579061453,
+        "Longitude_decimal": 112.176020508,
+        "Elevation": 46.7613
+    },
+    {
+        "Name": 19,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.579092003,
+        "Longitude_decimal": 112.175999244,
+        "Elevation": 47.8333
+    },
+    {
+        "Name": 20,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.579087444,
+        "Longitude_decimal": 112.175999919,
+        "Elevation": 46.8385
+    },
+    {
+        "Name": 21,
+        "Code": "Detail",
+        "Latitude_decimal": -2.579185653,
+        "Longitude_decimal": 112.17598805,
+        "Elevation": 55.4615
+    },
+    {
+        "Name": 23,
+        "Code": "test",
+        "Latitude_decimal": -2.569734903,
+        "Longitude_decimal": 112.179825653,
+        "Elevation": 49.0317
+    },
+    {
+        "Name": 24,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.567140586,
+        "Longitude_decimal": 112.178615031,
+        "Elevation": 48.045
+    },
+    {
+        "Name": 25,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.567149678,
+        "Longitude_decimal": 112.178613778,
+        "Elevation": 47.1204
+    },
+    {
+        "Name": 26,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.567254097,
+        "Longitude_decimal": 112.178584697,
+        "Elevation": 46.9969
+    },
+    {
+        "Name": 27,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.567264014,
+        "Longitude_decimal": 112.178580892,
+        "Elevation": 49.1416
+    },
+    {
+        "Name": 28,
+        "Code": "Detail",
+        "Latitude_decimal": -2.567333167,
+        "Longitude_decimal": 112.178551467,
+        "Elevation": 49.1274
+    },
+    {
+        "Name": 29,
+        "Code": "test",
+        "Latitude_decimal": -2.587767736,
+        "Longitude_decimal": 112.171964328,
+        "Elevation": 44.2241
+    },
+    {
+        "Name": 30,
+        "Code": "Detail",
+        "Latitude_decimal": -2.585262975,
+        "Longitude_decimal": 112.182373014,
+        "Elevation": 44.3532
+    },
+    {
+        "Name": 31,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.585281722,
+        "Longitude_decimal": 112.182438806,
+        "Elevation": 44.1548
+    },
+    {
+        "Name": 33,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.585286461,
+        "Longitude_decimal": 112.182444144,
+        "Elevation": 41.9411
+    },
+    {
+        "Name": 34,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.585346583,
+        "Longitude_decimal": 112.182490978,
+        "Elevation": 44.6564
+    },
+    {
+        "Name": 36,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.585340522,
+        "Longitude_decimal": 112.182492494,
+        "Elevation": 42.6299
+    },
+    {
+        "Name": 37,
+        "Code": "Detail",
+        "Latitude_decimal": -2.585370453,
+        "Longitude_decimal": 112.182540075,
+        "Elevation": 49.4539
+    },
+    {
+        "Name": 38,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.583986731,
+        "Longitude_decimal": 112.164974233,
+        "Elevation": 42.0424
+    },
+    {
+        "Name": 39,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.5839973,
+        "Longitude_decimal": 112.164974936,
+        "Elevation": 44.1657
+    },
+    {
+        "Name": 40,
+        "Code": "Detail",
+        "Latitude_decimal": -2.584076631,
+        "Longitude_decimal": 112.164984608,
+        "Elevation": 44.8645
+    },
+    {
+        "Name": 41,
+        "Code": "Ats Sungai",
+        "Latitude_decimal": -2.583936,
+        "Longitude_decimal": 112.164960375,
+        "Elevation": 44.8432
+    },
+    {
+        "Name": 42,
+        "Code": "Bwh Sungai",
+        "Latitude_decimal": -2.583947458,
+        "Longitude_decimal": 112.164964356,
+        "Elevation": 41.8561
+    },
+    {
+        "Name": 43,
+        "Code": "Detail",
+        "Latitude_decimal": -2.583906433,
+        "Longitude_decimal": 112.164955381,
+        "Elevation": 45.3112
+    },
+    {
+        "Name": 44,
+        "Code": "Detail",
+        "Latitude_decimal": -2.583885114,
+        "Longitude_decimal": 112.164951847,
+        "Elevation": 44.1055
+    },
+    {
+        "Name": 45,
+        "Code": "Detail",
+        "Latitude_decimal": -2.583851594,
+        "Longitude_decimal": 112.164937108,
+        "Elevation": 44.0534
+    }
+]
