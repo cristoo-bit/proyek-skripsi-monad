@@ -1,282 +1,374 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monad Geo-Data Explorer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monad Geo-Data Explorer – UPN “Veteran” Yogyakarta</title>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 900px; margin: auto; }
-        #container { border: 1px solid #ddd; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        /* 2. Siapkan div untuk peta */
-        #map { height: 500px; border-radius: 8px; margin-top: 1em; }
-        #status { font-style: italic; color: #555; }
-        #totalPoints { font-weight: bold; font-size: 1.2em; }
-    </style>
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- Ethers -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <style>
+    :root{--ink:#1b1f24;--muted:#6b7280;--card:#fff;--border:#e5e7eb;--accent:#2563eb;--success:#059669}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fafafa;margin:0}
+    header{background:var(--card);border-bottom:1px solid var(--border)}
+    .wrap{max-width:1080px;margin:0 auto;padding:16px 20px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .brand img{width:56px;height:56px;object-fit:contain}
+    .brand h1{font-size:20px;margin:0;line-height:1.1}
+    .brand small{display:block;color:var(--muted);font-weight:500}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:16px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+    .card h2{margin:.1rem 0 .75rem 0;font-size:18px}
+    .meta{display:flex;flex-wrap:wrap;gap:10px;margin:.25rem 0 .75rem}
+    .badge{background:#f3f4f6;border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px}
+    .badge.success{background:#ecfdf5;border-color:#bbf7d0;color:#065f46}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    #map{height:520px;border-radius:10px;border:1px solid var(--border)}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px}
+    th{background:#fafafa}
+    tr:hover{background:#f8fafc}
+    .addr{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;display:inline-block;vertical-align:bottom}
+    .link{color:var(--accent);text-decoration:none}
+    .muted{color:var(--muted)}
+    footer{color:var(--muted);font-size:12px;margin:16px 0 24px}
+  </style>
 </head>
 <body>
-    <div id="container">
+  <header>
+    <div class="wrap brand">
+      <img src="logo upn.png" alt="Logo UPN">
+      <div>
         <h1>Eksplorasi Data Geografis Monad</h1>
-        <p>Status: <span id="status">Menghubungkan ke Monad Testnet...</span></p>
-        <p>Total Titik Data Tersimpan: <span id="totalPoints">...</span></p>
+        <small>Program Studi Geomatika – UPN “Veteran” Yogyakarta</small>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <!-- KIRI: PETA -->
+      <section class="card">
+        <h2>Peta Titik Koordinat</h2>
+        <div class="meta">
+          <span class="badge">Status: <span id="status" class="mono muted">Menghubungkan...</span></span>
+          <span class="badge success">Total Titik: <span id="totalPoints" class="mono">0</span></span>
+        </div>
         <div id="map"></div>
+      </section>
+
+      <!-- KANAN: INFO KONTRAK + AMBIL DATA BY ID -->
+      <aside class="card">
+        <h2>Informasi Kontrak</h2>
+        <div class="meta"><div class="badge">Jaringan: <span class="mono">Monad Testnet</span></div></div>
+        <p class="muted" style="margin:.25rem 0">Alamat Kontrak:</p>
+        <p><a id="addrLink" class="mono link addr" href="#" target="_blank"></a></p>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+        <h2>Mencari Data</h2>
+        <p class="muted">Masukkan <b>ID titik</b> untuk lihat detail:</p>
+        <div style="display:flex;gap:8px;margin:.25rem 0 1rem">
+          <input id="pointId" type="number" min="1" value="1" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px">
+          <button id="btnGet" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:#111827;color:#fff;cursor:pointer">Get</button>
+        </div>
+        <div id="detailBox" class="mono muted">—</div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+        <h2>Detail & Hash</h2>
+        <p class="muted" style="margin-top:0"> <code>PointAdded</code> → <i>tx hash</i> → koordinat:</p>
+        <div style="max-height:240px;overflow:auto;border:1px solid var(--border);border-radius:8px">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Kode</th><th>Lat</th><th>Lon</th><th>Elev</th><th>Tx Hash</th></tr>
+            </thead>
+            <tbody id="eventsTbody"></tbody>
+          </table>
+        </div>
+      </aside>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"  type="application/javascript"></script>
-    <script>
-        // --- KONFIGURASI ---
-        const contractAddress = "0xD2B3Be93431dc84F021F50e437d1A642861B4d50"; // Alamat kontrak Anda
-        const monadRpcUrl = "https://rpc.testnet.monad.xyz";
-        const contractABI = [
-             
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "code",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "int256",
-          "name": "latitude",
-          "type": "int256"
-        },
-        {
-          "indexed": false,
-          "internalType": "int256",
-          "name": "longitude",
-          "type": "int256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "elevation",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "PointAdded",
-      "type": "event"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_code",
-          "type": "string"
-        },
-        {
-          "internalType": "int256",
-          "name": "_lat",
-          "type": "int256"
-        },
-        {
-          "internalType": "int256",
-          "name": "_lon",
-          "type": "int256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_elev",
-          "type": "uint256"
-        }
-      ],
-      "name": "addPoint",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "geoPoints",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "code",
-          "type": "string"
-        },
-        {
-          "internalType": "int256",
-          "name": "latitude",
-          "type": "int256"
-        },
-        {
-          "internalType": "int256",
-          "name": "longitude",
-          "type": "int256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "elevation",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_id",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPoint",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        },
-        {
-          "internalType": "int256",
-          "name": "",
-          "type": "int256"
-        },
-        {
-          "internalType": "int256",
-          "name": "",
-          "type": "int256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "pointCount",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "totalPoints",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+    <section class="card" style="margin-top:18px">
+      <h2>Daftar Titik Koordinat</h2>
+      <p class="muted" style="margin-top:0">Klik baris untuk fokus marker di peta.</p>
+      <div style="max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:8px">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Kode</th><th>Latitude</th><th>Longitude</th><th>Elev (m)</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>© UPN “Veteran” Yogyakarta • Dikelola untuk keperluan akademik</footer>
+  </main>
+
+  <script>
+  // ====== KONFIGURASI ======
+  const contractAddress = "0x45F839f0D77d3141316dB45B0ed76608aDbB9E64";
+
+  // RPC: pilih yang mendukung eth_getLogs
+  const monadRpcUrl = "https://testnet-rpc.monad.xyz"; // QuickNode
+
+  // Explorer Monad
+  const explorerAddrBase = "https://testnet.monadexplorer.com/address/";
+  const explorerTxBase   = "https://testnet.monadexplorer.com/tx/";
+
+  // Mulai scan event dari sekitar blok upload (bukan blok deploy)
+  const EVENTS_START_BLOCK = 27_600_000;
+
+  // Daftar TX upload (fallback baca event dari receipt)
+  const KNOWN_UPLOAD_TX = [
+"0xe45c0138e8000548ae7542146b59028c946817b3e21c450ad79a1382f96a34e9",
+"0xa22aedbae8f16622654730faa6ad7a17de6b971ea1f7f580737a6ea1a36bcbfb",
+"0x121ce4572d2b361b1a85face13d021d2985b87c02400fe60a29b8774b4960d4c",
+"0x7c0e8b7f3903227888443b1a1cb8bda34566778319e358509da5c0d72857668d",
+"0x9791dfe00ec51b65e1c50ae6c3710240b87d875fa020667b5b89f08660c0189a",
+"0x2e83b2924d3a2fbf7fadcd42915c305818352cc7dd12034efd71d887aa6baba2",
+"0x4da25f4f26c1459ccc4121097c2bec7719063bef059c8e72c4ca435b8374887d",
+"0xcc6b29178e4031c604737e299478f9ea6f0bf144a661f61e4e8069aa99e31bfa",
+"0xbcec10611f91ea927d4bc9d5d853524f56bcd7b0e293aca4f395b20ba4d94664",
+"0xeb432c968f0100bc0c3a65899228c675c7a9e1ef5eee75f1ee32753f1512a2e7",
+"0x71467af023d50294077a96e70bd6d1b22e0a38e43137222d2178cf9549c625bb",
+"0xfbbde80f0055f8373ce23aa60e407dcf2be225f95d2a0cd4bb09e3ad7b4b86b3",
+"0xb9b39cd87bc1aea9208253a471f9f9500a988f19bda2acdd916aef7a1ca586b8",
+"0x4754acefb8857e43eb704cc9f4022c03a68bd92d52095c25d93f5684050b5e41",
+"0x430aa441b4645564c33839baa5b84ef04e40eb8d0c7f0cadcc5081ebc833d032",
+"0xe24aec15e6704591a185272599dbe86650bef640598d6c57f845af75429e3a43",
+"0x2cfae97a2e55666d4b314c957dc2c32c0dd25066a8ac4649a6fc4dec014c6b63",
+"0xc0a5259e9f39bd6df5cb2d871b03010cbc4ffbdbadbab124d5bcf507475a31aa",
+"0xd2d55c25178d1b5a6c8f6cb731d3335276c4b62429d5dd8d7e9e2adeaf410954",
+"0x6c8af2ce99e4833fc92fa63236b3cdc89663803e2c4870ffa2ee268b36c9bb90",
+"0x6afca0f161433e76105cb67494d5d2587cbec7fc7150f77e76addd956af3f662",
+"0x3771c434f225f9cc03389000b97064eb15510fd86656a2c1046a03f06f5cc5c6",
+"0x24e14038b4e96286120713b70dd5ff446b8baa8427030e21a81075940490b2a5",
+"0x156cad74b5353076984940fffb2d6942c9096d1920fb8aaef8a2b475f8edf921",
+"0x39c2e48e91c2c61da18b08ec66ed33d6b2a8882d7634652d4a2329d61ae13949",
+"0x612bd43948e38e9bfc6ec4531dca657480f91eb588823527cda82efa5976ea50",
+"0xfbcf9aff9eaf62443952ac9e21d250393bc25fefb00d3aed29701193af8f9706",
+"0x03bcd9853650738e5b4655ca053fbbd1af407bcf1942c61632f216f311bbc68c",
+"0x88c8984206f8a7db1109c016c3061fd057a9f38fd59c7bf32f0600816c7d8bc8",
+"0xa098600ed75e68cba7610e63afcbfdd46aa0b42176d0d67fdb3a42b83d2591d8",
+"0x3f6f73cd3dbe198265012b2ea7003c3c1339faae07ef062b03026c0c1022a5b3",
+"0xf1c446ab1cffc36e65293a5c9725992f2e51a7cfe24c4e66ee9f2c013aa4c8f5",
+"0x981981bf2993f5af6cde32bf1a0364b47bef047940bad28fb41b04c615c2c157",
+"0xacbb5421c7b20eaffc21b17ba53e2893b5f9c50b25bf036e81ad83ad2293ee96",
+"0x3862d324ac717c96f1775447c4892a284ea40a16fe58bfb35eaa8b502b6e4945",
+"0x174b86a7c24ffb1192ea6cf114803654378825f7719a9c50aa83d5b98d54e1ab",
+"0xe2f1d318913751ca19d34a16ed46045f3a9f72b468317b6a33f8d463be737adc",
+"0x0db08aa6d50f25613c612e8ea2595bec36b9fbd7cd6fdef154a3b8d7aab86d14",
+"0xae75a767dd6ca8c7051c51ad1074ae6b69cc4e28520a74ef032fb3bc4ca66652",
+"0x0b9411be21479b15f08dfcec38a0608cbb9c4ee3825363e5fc7dbb669820dfab",
+"0x99f4e6cf30ed41aa2b89351bd1857202ca25c6c2c7716737dc47c1c2b72a36f0",
+"0xbc2edf9322d37ff4d93df15dd631c39a9d6b195f30b6589c2d2ceb36c95a3982"
+];
+
+  // ====== ABI minimal ======
+  const contractABI = [
+    {"anonymous":false,"inputs":[
+      {"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},
+      {"indexed":false,"internalType":"string","name":"code","type":"string"},
+      {"indexed":false,"internalType":"int256","name":"latitude","type":"int256"},
+      {"indexed":false,"internalType":"int256","name":"longitude","type":"int256"},
+      {"indexed":false,"internalType":"uint256","name":"elevation","type":"uint256"},
+      {"indexed":false,"internalType":"uint256","name":"timestamp","type":"uint256"}
+    ],"name":"PointAdded","type":"event"},
+    {"inputs":[{"internalType":"uint256","name":"_id","type":"uint256"}],
+     "name":"getPoint","outputs":[
+       {"internalType":"uint256","name":"","type":"uint256"},
+       {"internalType":"string","name":"","type":"string"},
+       {"internalType":"int256","name":"","type":"int256"},
+       {"internalType":"int256","name":"","type":"int256"},
+       {"internalType":"uint256","name":"","type":"uint256"},
+       {"internalType":"uint256","name":"","type":"uint256"}
+     ],"stateMutability":"view","type":"function"},
+    {"inputs":[],"name":"totalPoints","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+  ];
+
+  // ====== UTIL ======
+  const PRECISION = 1_000_000;
+  const statusEl = document.getElementById("status");
+  const totalEl  = document.getElementById("totalPoints");
+  const tableBody= document.getElementById("tableBody");
+  const eventsTbody= document.getElementById("eventsTbody");
+  const detailBox= document.getElementById("detailBox");
+  const addrLink = document.getElementById("addrLink");
+  const pointIdEl= document.getElementById("pointId");
+  const btnGet   = document.getElementById("btnGet");
+
+  let map, markers = {};
+  let provider = null;
+  let contract = null;
+
+  function short(s){ return s ? s.slice(0,6)+"…"+s.slice(-4) : ""; }
+  function toDec(x){ return Number(x).toFixed(6); }
+  function toDMS(dec, isLat){
+    const abs = Math.abs(dec);
+    const deg = Math.floor(abs);
+    const minFloat = (abs - deg) * 60;
+    const min = Math.floor(minFloat);
+    const sec = (minFloat - min) * 60;
+    const hemi = isLat ? (dec >= 0 ? 'N' : 'S') : (dec >= 0 ? 'E' : 'W');
+    const padDeg = isLat ? 2 : 3;
+    const d = String(deg).padStart(padDeg, '0');
+    const m = String(min).padStart(2, '0');
+    const s = sec.toFixed(5).padStart(8, '0');
+    return `${d}°${m}′${s}″${hemi}`;
+  }
+
+  async function fetchPointAddedLogsChunked(provider, address, fromBlock, toBlock, step=5000){
+    const iface = new ethers.utils.Interface(contractABI);
+    const topic = ethers.utils.id("PointAdded(uint256,string,int256,int256,uint256,uint256)");
+    const out = [];
+    let start = fromBlock;
+    while(start <= toBlock){
+      const end = Math.min(start+step, toBlock);
+      try{
+        const logs = await provider.getLogs({address, fromBlock:start, toBlock:end, topics:[topic]});
+        for(const log of logs){ try{ out.push({log, parsed: iface.parseLog(log)});}catch{} }
+      }catch(e){
+        if(step > 1000){ step = Math.floor(step/2); continue; }
+        break;
+      }
+      start = end + 1;
     }
-  
-            // <<-- PASTIKAN ABI KONTRAK ANDA SUDAH DITEMPEL DI SINI -->>
-        ];
+    return out;
+  }
 
-        // --- LOGIKA UTAMA ---
-        async function main() {
-            const statusEl = document.getElementById("status");
-            const totalPointsEl = document.getElementById("totalPoints");
+  // tombol GET selalu aktif
+  btnGet.addEventListener("click", async () => {
+    try{
+      if(!contract){ detailBox.textContent="Kontrak belum siap. Tunggu sebentar lalu klik lagi."; return; }
+      const id = Number(pointIdEl.value||1);
+      if(!id) return;
+      const p = await contract.getPoint(id);
+      const code = p[1];
+      const lat  = Number(p[2]) / PRECISION;
+      const lon  = Number(p[3]) / PRECISION;
+      const elev = Number(p[4]) / PRECISION;
+      detailBox.innerHTML = `ID: <b>${id}</b> | Kode: <b>${code}</b><br>
+        Lat: <span class="mono">${toDMS(lat,true)}</span> (${toDec(lat)}) |
+        Lon: <span class="mono">${toDMS(lon,false)}</span> (${toDec(lon)}) |
+        Elev: <span class="mono">${elev.toFixed(4)} m</span>`;
+      if(markers[id]){ markers[id].openPopup(); map.setView([lat,lon], 15); }
+    }catch(e){ console.error(e); detailBox.textContent="Gagal membaca data. Cek console (F12)."; }
+  });
 
-            try {
-                // 3. Membuat koneksi ke blockchain
-                const provider = new ethers.providers.JsonRpcProvider(monadRpcUrl);
-                
-                // 4. Membuat object untuk berinteraksi dengan kontrak
-                const geoContract = new ethers.Contract(contractAddress, contractABI, provider);
-                statusEl.textContent = "Koneksi berhasil! Mengambil data...";
+  async function main(){
+    try{
+      provider = new ethers.providers.JsonRpcProvider(monadRpcUrl);
+      contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-                // 5. Inisialisasi Peta Leaflet
-                // Set view ke sekitar Indonesia
-                const map = L.map('map').setView([-2.5, 118.0], 5);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
+      addrLink.textContent = short(contractAddress);
+      addrLink.href = explorerAddrBase + contractAddress;
 
-                // 6. Ambil total titik data
-                const total = await geoContract.totalPoints();
-                totalPointsEl.textContent = total.toString();
-                statusEl.textContent = `Mengambil ${total.toString()} titik data...`;
+      map = L.map('map').setView([-2.5, 118.0], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
 
-                // 7. Loop untuk mengambil setiap titik dan menampilkannya di peta
-                const PRECISION = 1000000; // Harus sama dengan yang di skrip upload
-                for (let i = 1; i <= total; i++) {
-                    const point = await geoContract.getPoint(i);
-                    
-                    // Konversi kembali ke desimal
-                    // point[2] adalah latitude, point[3] adalah longitude
-                    const lat = point[2].toNumber() / PRECISION;
-                    const lon = point[3].toNumber() / PRECISION;
-                    
-                    // point[1] adalah code
-                    const code = point[1];
+      statusEl.textContent = "Koneksi berhasil. Mengambil data…";
+      const total = await contract.totalPoints();
+      totalEl.textContent = total.toString();
 
-                    // Tambahkan marker ke peta
-                    L.marker([lat, lon]).addTo(map)
-                        .bindPopup(`<b>Titik #${i}</b><br>${code}`);
-                    
-                    // Update status
-                    statusEl.textContent = `Titik #${i} berhasil dimuat.`;
-                }
+      for(let i=1; i<= Number(total); i++){
+        const p = await contract.getPoint(i);
+        const code = p[1];
+        const lat  = Number(p[2]) / PRECISION;
+        const lon  = Number(p[3]) / PRECISION;
+        const elev = Number(p[4]) / PRECISION;
 
-                statusEl.textContent = "Semua data berhasil ditampilkan di peta!";
+        const latDMS = toDMS(lat, true);
+        const lonDMS = toDMS(lon, false);
 
-            } catch (error) {
-                console.error("Gagal terhubung atau mengambil data:", error);
-                statusEl.textContent = "Gagal mengambil data. Cek console log (F12).";
-            }
+        const m = L.marker([lat,lon]).addTo(map).bindPopup(
+          `<b>Titik #${i} — ${code}</b><br/>
+           Lat: ${latDMS} (${toDec(lat)})<br/>
+           Lon: ${lonDMS} (${toDec(lon)})<br/>
+           Elev: ${elev.toFixed(4)} m`
+        );
+        markers[i] = m;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td class="mono">${i}</td>
+          <td>${code}</td>
+          <td class="mono">${latDMS}</td>
+          <td class="mono">${lonDMS}</td>
+          <td class="mono">${elev.toFixed(4)}</td>`;
+        tr.style.cursor="pointer";
+        tr.onclick = ()=>{ m.openPopup(); map.setView([lat,lon], 15); };
+        tableBody.appendChild(tr);
+      }
+      statusEl.textContent = "Semua data berhasil ditampilkan di peta!";
+
+      // ---- Ambil event via getLogs (chunk) ----
+      let logsParsed = 0;
+      try{
+        const latest = await provider.getBlockNumber();
+        const fromBlk = EVENTS_START_BLOCK;
+        const logs = await fetchPointAddedLogsChunked(provider, contractAddress, fromBlk, latest, 5000);
+        for(const {log, parsed} of logs){
+          const id   = parsed.args.id.toString();
+          const code = parsed.args.code;
+          const lat  = Number(parsed.args.latitude)  / PRECISION;
+          const lon  = Number(parsed.args.longitude) / PRECISION;
+          const elev = Number(parsed.args.elevation) / PRECISION;
+          const tr = document.createElement("tr");
+          const txh = log.transactionHash;
+          const txLink = `<a class="link mono" target="_blank" href="${explorerTxBase+txh}">${short(txh)}</a>`;
+          tr.innerHTML = `<td class="mono">${id}</td><td>${code}</td>
+                          <td class="mono">${lat.toFixed(6)}</td><td class="mono">${lon.toFixed(6)}</td>
+                          <td class="mono">${elev.toFixed(4)}</td><td>${txLink}</td>`;
+          eventsTbody.appendChild(tr);
+          logsParsed++;
         }
+      }catch(e){ console.warn("getLogs error:", e); }
 
-        window.addEventListener('load', main);
-    </script>
+      // ---- FALLBACK: jika logs kosong, bongkar dari receipt 42 tx ----
+      if (!logsParsed && KNOWN_UPLOAD_TX.length){
+        const iface = new ethers.utils.Interface(contractABI);
+        for (const h of KNOWN_UPLOAD_TX) {
+          try {
+            const rec = await provider.getTransactionReceipt(h);
+            if (!rec || !rec.logs) continue;
+            for (const lg of rec.logs) {
+              try {
+                const parsed = iface.parseLog(lg);
+                if (parsed && parsed.name === "PointAdded") {
+                  const id   = parsed.args.id.toString();
+                  const code = parsed.args.code;
+                  const lat  = Number(parsed.args.latitude)  / PRECISION;
+                  const lon  = Number(parsed.args.longitude) / PRECISION;
+                  const elev = Number(parsed.args.elevation) / PRECISION;
+                  const tr = document.createElement("tr");
+                  const txLink = `<a class="link mono" target="_blank" href="${explorerTxBase+h}">${short(h)}</a>`;
+                  tr.innerHTML = `<td class="mono">${id}</td><td>${code}</td>
+                                  <td class="mono">${lat.toFixed(6)}</td><td class="mono">${lon.toFixed(6)}</td>
+                                  <td class="mono">${elev.toFixed(4)}</td><td>${txLink}</td>`;
+                  eventsTbody.appendChild(tr);
+                }
+              } catch(_){}
+            }
+          } catch(e){ console.warn("Receipt read failed:", e); }
+        }
+        if (!eventsTbody.children.length) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td colspan="6" class="muted">Event masih kosong. Coba refresh atau pastikan RPC mendukung logs.</td>`;
+          eventsTbody.appendChild(tr);
+        }
+      }
+
+    }catch(err){
+      console.error(err);
+      statusEl.textContent = "Gagal mengambil data. Cek console (F12).";
+    }
+  }
+  window.addEventListener('load', main);
+  </script>
 </body>
 </html>
